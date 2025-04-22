@@ -67,22 +67,26 @@ def update_pie_chart(selected_site):
 @app.callback(
     Output(component_id='success-payload-scatter-chart', component_property='figure'),
     [Input(component_id='site-dropdown', component_property='value'),
-     Input(component_id="payload-slider", component_property="value")])
+     Input(component_id="payload-slider", component_property="value")]
+)
 def update_scatter(selected_site, payload_range):
     low, high = payload_range
-    df_filtered = spacex_df[
-        (spacex_df['Payload Mass (kg)'] >= low) & (spacex_df['Payload Mass (kg)'] <= high)
+
+    site_df = spacex_df if selected_site == 'ALL' else spacex_df[spacex_df['Launch Site'] == selected_site]
+
+    df_filtered = site_df[
+        (site_df['Payload Mass (kg)'] >= low) & (site_df['Payload Mass (kg)'] <= high)
     ]
-    if selected_site == 'ALL':
-        fig = px.scatter(df_filtered, x='Payload Mass (kg)', y='class',
-                         color='Booster Version Category',
-                         title='Payload vs. Success for All Sites')
-    else:
-        site_df = df_filtered[df_filtered['Launch Site'] == selected_site]
-        fig = px.scatter(site_df, x='Payload Mass (kg)', y='class',
-                         color='Booster Version Category',
-                         title=f'Payload vs. Success for {selected_site}')
+
+    fig = px.scatter(
+        df_filtered,
+        x='Payload Mass (kg)',
+        y='class',
+        color='Booster Version Category',
+        title=f'Payload vs. Success for {"All Sites" if selected_site == "ALL" else selected_site}'
+    )
     return fig
+
 
 
 # Run the app
